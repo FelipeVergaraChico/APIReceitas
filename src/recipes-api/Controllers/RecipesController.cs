@@ -12,12 +12,12 @@ namespace recipes_api.Controllers;
 [ApiController]
 [Route("recipe")]
 public class RecipesController : ControllerBase
-{    
+{
     public readonly IRecipeService _service;
     
     public RecipesController(IRecipeService service)
     {
-        this._service = service;        
+        this._service = service;
     }
 
     // 1 - Sua aplicação deve ter o endpoint GET /recipe
@@ -25,7 +25,8 @@ public class RecipesController : ControllerBase
     [HttpGet]
     public IActionResult Get()
     {
-        throw new NotImplementedException();    
+        var Recipes = _service.GetRecipes();
+        return Ok(Recipes);
     }
 
     // 2 - Sua aplicação deve ter o endpoint GET /recipe/:name
@@ -33,27 +34,60 @@ public class RecipesController : ControllerBase
     [HttpGet("{name}", Name = "GetRecipe")]
     public IActionResult Get(string name)
     {                
-        throw new NotImplementedException();
+        Recipe recipe = _service.GetRecipe(name);
+        if (recipe != null)
+        {
+            return Ok(recipe);
+        }
+        return NotFound();
     }
 
     // 3 - Sua aplicação deve ter o endpoint POST /recipe
     [HttpPost]
-    public IActionResult Create([FromBody]Recipe recipe)
+    public IActionResult Create([FromBody] Recipe recipe)
     {
-        throw new NotImplementedException();
+        _service.AddRecipe(recipe);
+        return Created("", recipe);
     }
 
     // 4 - Sua aplicação deve ter o endpoint PUT /recipe
     [HttpPut("{name}")]
-    public IActionResult Update(string name, [FromBody]Recipe recipe)
+    public IActionResult Update(string name, [FromBody] Recipe recipe)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var recipeE = _service.RecipeExists(name);
+            if(recipeE)
+            {
+                _service.UpdateRecipe(recipe);
+                return NoContent();
+            }
+            throw new Exception("");
+        }
+        catch (Exception err)
+        {
+            return BadRequest(err.Message);
+        }
     }
 
     // 5 - Sua aplicação deve ter o endpoint DEL /recipe
     [HttpDelete("{name}")]
     public IActionResult Delete(string name)
     {
-        throw new NotImplementedException();
-    }    
+        try
+        {
+            var recipeE = _service.RecipeExists(name);
+
+            if(recipeE)
+            {
+                _service.DeleteRecipe(name);
+                return NoContent();
+            }
+            throw new Exception("");
+        }
+        catch (Exception err)
+        {
+            return BadRequest(err.Message);
+        }
+    }
 }
